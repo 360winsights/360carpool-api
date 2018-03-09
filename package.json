@@ -1,0 +1,19 @@
+{
+  "name": "360carpool-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@work:360winsights/360carpool-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mysql": "^2.15.0",
+    "restify": "^6.3.4"
+  }
+}
