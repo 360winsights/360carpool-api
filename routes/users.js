@@ -64,7 +64,6 @@ router.get('/users/toggleDriverStatus/:id', (req, res) => {
 })
 
 // adjust user karma
-// toggle user driving status
 router.get('/users/updateKarma/:id/:value', (req, res) => {
   let newStatus
   // first get whether or not user is

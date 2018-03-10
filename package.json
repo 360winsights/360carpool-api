@@ -1,7 +1,7 @@
 {
   "name": "360carpool-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "API for 360winsight's Hack For Good project",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "googlemaps": "^1.12.0",
     "mysql": "^2.15.0",
     "restify": "^6.3.4",
     "restify-plugins": "^1.6.0",

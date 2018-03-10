@@ -57,9 +57,22 @@ conn.connect((err) => {
     )
   `)
 
-  // rides
+  // cars
   conn.query(`
-    CREATE TABLE rides (
+    CREATE TABLE cars (
+      id int NOT NULL PRIMARY KEY,
+      driver_id int NOT NULL,
+      manufacturer varchar(255),
+      model varchar(255),
+      gas_mileage int(11),
+      available_seats int(11),
+      FOREIGN KEY (driver_id) REFERENCES users(id)
+    )
+  `)
+
+  // cars
+  conn.query(`
+    CREATE TABLE cars (
       id int NOT NULL PRIMARY KEY,
       driver_id int NOT NULL,
       manufacturer varchar(255),
