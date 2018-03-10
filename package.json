@@ -13,7 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "googlemaps": "^1.12.0",
+    "@google/maps": "^0.4.5",
     "mysql": "^2.15.0",
     "restify": "^6.3.4",
     "restify-plugins": "^1.6.0",

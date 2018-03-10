@@ -1,19 +1,19 @@
-const GoogleMapsAPI = require('googlemaps')
-
-const publicConfig = {
+const gmc = require('@google/maps').createClient({
   key: 'AIzaSyAt4d1AYJVRO7XvJK2DyPluofs7QGRZVIc',
-  stagger_time: 1000, // for elevationPath
-  encode_polylines:   false,
-  secure: true // use https
-}
-const gmAPI = new GoogleMapsAPI(publicConfig)
+  Promise: Promise
+})
 
 const params = {
   origins: '420 Green Street, Whitby, Ontario',
   destinations: '1269 Concession 3, Uxbridge, Ontario',
   mode: 'driving'
-};
+}
 
-gmAPI.distance(params, (err, result)=> {
-  console.log(result.rows[0].elements[0].distance.value)
-})
+gmc.distanceMatrix(params)
+  .asPromise()
+  .then((resp) => {
+    console.log(resp.json.rows[0].elements[0].distance.value)
+  })
+  .catch((err) => {
+    throw err
+  })

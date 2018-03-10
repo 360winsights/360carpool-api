@@ -32,6 +32,7 @@ conn.connect((err) => {
       name varchar(255) NOT NULL,
       company varchar(255) NOT NULL,
       is_driver tinyint(1) NOT NULL,
+      driver int(11),
       karma int(11),
       street_address varchar(255) NOT NULL,
       postal_code varchar(255) NOT NULL,
@@ -41,45 +42,46 @@ conn.connect((err) => {
       arrive_home time,
       leave_work time NOT NULL,
       arrive_work time NOT NULL
-    )
-  `)
+    )`, (err, result) => {
+    if (err) {
+      throw err
+    }
+
+    console.log('successfuly created users table')
+  })
 
   // car data
   conn.query(`
     CREATE TABLE cars (
-      id int NOT NULL PRIMARY KEY,
+      id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
       driver_id int NOT NULL,
       manufacturer varchar(255),
       model varchar(255),
       gas_mileage int(11),
       available_seats int(11),
       FOREIGN KEY (driver_id) REFERENCES users(id)
-    )
-  `)
+    )`, (err, result) => {
+    if (err) {
+      throw err
+    }
 
-  // cars
-  conn.query(`
-    CREATE TABLE cars (
-      id int NOT NULL PRIMARY KEY,
-      driver_id int NOT NULL,
-      manufacturer varchar(255),
-      model varchar(255),
-      gas_mileage int(11),
-      available_seats int(11),
-      FOREIGN KEY (driver_id) REFERENCES users(id)
-    )
-  `)
+    console.log('successfuly created cars table')
+  })
 
-  // cars
+  // rides
   conn.query(`
-    CREATE TABLE cars (
-      id int NOT NULL PRIMARY KEY,
-      driver_id int NOT NULL,
-      manufacturer varchar(255),
-      model varchar(255),
-      gas_mileage int(11),
-      available_seats int(11),
-      FOREIGN KEY (driver_id) REFERENCES users(id)
-    )
-  `)
+    CREATE TABLE drives (
+      id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
+      driver_id int(11) NOT NULL,
+      available tinyint(1) NOT NULL,
+      FOREIGN KEY (driver_id) REFERENCES cars(driver_id)
+    )`, (err, result) => {
+    if (err) {
+      throw err
+    }
+
+    console.log('successfuly created drives table')
+  })
+
+  conn.end()
 })
