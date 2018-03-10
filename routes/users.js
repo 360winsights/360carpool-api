@@ -34,7 +34,7 @@ router.get('/users/:id', (req, res) => {
       throw error
     }
 
-    res.end(JSON.stringify(results))
+    res.json( { result: results } )
   })
 })
 
@@ -91,7 +91,7 @@ router.get('/users/topKarma/:max', (req, res) => {
       throw error
     }
 
-    res.end(JSON.stringify(results, null, 4))
+    res.json( { result: results } )
   })
 })
 

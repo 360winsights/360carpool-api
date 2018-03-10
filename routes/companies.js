@@ -11,7 +11,7 @@ router.get('/company', (req, res) => {
       throw error
     }
 
-    res.end(JSON.stringify(results, null, 4))
+    res.json( { result: results } )
   })
 })
 
@@ -22,7 +22,7 @@ router.get('/company/:id', (req, res) => {
       throw error
     }
 
-    res.end(JSON.stringify(results, null, 4))
+    res.json( { result: results } )
   })
 })
 
