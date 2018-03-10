@@ -16,6 +16,18 @@ router.get('/drives/getRiders/:driver_id', (req, res) => {
   })
 })
 
+// get users riding with rider
+router.get('/drives/', (req, res) => {
+  const query = 'select * from drives'
+  conn.query(query, function (error, results, fields) {
+    if (error) {
+      throw error
+    }
+
+    res.json( { result: results })
+  })
+})
+
 // tries to add user to driver's route
 router.get('/drives/carpooling/joinRide/:driver_id/:rider_id/:which_way', (req, res) => {
   const gmc = require('../maps/mapsConfig.js')
@@ -37,6 +49,7 @@ router.get('/drives/carpooling/joinRide/:driver_id/:rider_id/:which_way', (req, 
       }
 
       stops = results[0].waypoints
+      const origWaypoints = results[0].waypoints
       const companyAddress = results[0].comp_address
       const driverAddress = results[0].driver_address
       const flex = results[0].flex // how many more metres driver is willing to go out of way
@@ -65,7 +78,7 @@ router.get('/drives/carpooling/joinRide/:driver_id/:rider_id/:which_way', (req, 
       const origParams = {
         origin: org,
         destination: dest,
-        waypoints: null,
+        waypoints: origWaypoints == '' ? null : origWaypoints,
         optimize: true
       }
 
@@ -89,16 +102,21 @@ router.get('/drives/carpooling/joinRide/:driver_id/:rider_id/:which_way', (req, 
                 regDist += data[i].distance.value
               }
 
-              let canThey
               if (newDist - regDist > flex) {
-                canThey = 'So, user will not be able to ride with this driver'
+                res.json( {status: 'fail', message: 'User can\'t ride with this driver' })
               } else {
-                canThey = 'User can ride with this driver'
+                conn.query(`update drives set waypoints='${stops}' where driver_id = ${req.params.driver_id}`, (err, results, fields) => {
+                  if (err) {
+                    throw err
+                  }
+
+                  res.json( {status: 'success', message: 'User can ride with this driver' })
+                })
               }
 
-              const msg = `Original distance to travel is ${regDist} m. New distance to travel with user riding is ${newDist} m. Driver is willing to go ${flex} m extra out of their way. ${canThey}`
+              // const msg = `Original distance to travel is ${regDist} m. New distance to travel with user riding is ${newDist} m. Driver is willing to go ${flex} m extra out of their way. ${canThey}`
 
-              res.json( {message: msg })
+              // res.json( {status: status, message: msg })
             })
             .catch((err) => {
               throw err
@@ -213,7 +231,7 @@ router.get('/drives/carpooling/searchRides/:rider_id/:which_way', (req, res) => 
     const ascending = arr.sort((a, b) => Number(a.addedDist) - Number(b.addedDist))
 
     res.json( { message: ascending } )
-  }, 3000)
+  }, 2000)
 })
 
 module.exports = router

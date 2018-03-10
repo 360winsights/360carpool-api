@@ -8,7 +8,7 @@ conn.query('insert into cars (driver_id, manufacturer, model, gas_mileage, avail
   if (err) {
     throw err
   }
-  
+
   console.log('insert successful')
 })
 
