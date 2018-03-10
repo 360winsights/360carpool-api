@@ -16,6 +16,7 @@
     "mysql": "^2.15.0",
     "restify": "^6.3.4",
     "restify-plugins": "^1.6.0",
+    "restify-router": "^0.5.0",
     "snazzy": "^7.1.1",
     "standard": "^11.0.0"
   }
