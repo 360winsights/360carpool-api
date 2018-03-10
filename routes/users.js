@@ -95,5 +95,4 @@ router.get('/users/topKarma/:max', (req, res) => {
   })
 })
 
-
 module.exports = router
