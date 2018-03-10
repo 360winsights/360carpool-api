@@ -30,11 +30,12 @@ conn.connect((err) => {
     CREATE TABLE users (
       id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
       name varchar(255) NOT NULL,
-      company varchar(255) NOT NULL,
+      company int(11) NOT NULL,
       is_driver tinyint(1) NOT NULL,
-      driver int(11),
+      driver_id int(11) NOT NULL,
       karma int(11),
       street_address varchar(255) NOT NULL,
+      city varchar(255) NOT NULL,
       postal_code varchar(255) NOT NULL,
       province varchar(255) NOT NULL,
       country varchar(255) NOT NULL,
@@ -81,6 +82,24 @@ conn.connect((err) => {
     }
 
     console.log('successfuly created drives table')
+  })
+
+  // company
+  conn.query(`
+    CREATE TABLE companies (
+      id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
+      name varchar(255) NOT NULL,
+      street_address varchar(255) NOT NULL,
+      city varchar(255) NOT NULL,
+      postal_code varchar(255) NOT NULL,
+      province varchar(255) NOT NULL,
+      country varchar(255) NOT NULL
+    )`, (err, result) => {
+    if (err) {
+      throw err
+    }
+
+    console.log('successfuly created companies table')
   })
 
   conn.end()

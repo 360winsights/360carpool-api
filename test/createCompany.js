@@ -3,12 +3,11 @@ const restify = require('restify')
 const mysql = require('mysql')
 const conn = config.db.get
 
-// print users column names
-conn.query('insert into cars (driver_id, manufacturer, model, gas_mileage, available_seats) values (\'1\', \'Ferrari\', \'2007 Enzo\', \'8\', \'1\')', (err, rows, fields) => {
+conn.query('insert into companies (name, street_address, city, postal_code, province, country) values (\'360insights\', \'300 Green Street\', \'Whitby\', \'L1N4Z4\', \'Ontario\', \'Canada\')', (err, rows, fields) => {
   if (err) {
     throw err
   }
-  
+
   console.log('insert successful')
 })
 

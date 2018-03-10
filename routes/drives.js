@@ -1,17 +1,19 @@
-const config  = require('../db-config/config.js')
-const conn    = config.db.get
+const config = require('../db-config/config.js')
+const conn = config.db.get
 const server = require('../main.js').server
 const Router = require('restify-router').Router
 const router = new Router()
 
-// create user
-router.get('/users/create/:name/:company/:is_driver/:street_address/:postal_code/:province/:country/', (req, res) => {
-  conn.query(`insert into users (name, company, is_driver, karma, street_address, postal_code, province, country, leave_home, arrive_home, leave_work, arrive_work) values ('${req.params.name}', '${req.params.company}', '${req.params.is_driver}', '0', '${req.params.street_address}', '${req.params.postal_code}', '${req.params.province}', '${req.params.country}', '08:00:00', '18:00:00', '17:00:00', '09:00:00')`,
-  (error, results, fields) => {
-    if (error) {
-      throw error
-    }
-
-    res.json( {'message': 'user inserted!'} )
-  })
+// get users riding with rider
+router.get('/drives/getRiders/:driver_id', (req, res) => {
+  conn.query(`
+    select drives.driver_id, users.driver_id
+    from drives
+    join users on drives.driver_id=users.driver_id
+    where drives.driver_id=${req.params.driver_id}
+  `), (error, results, fields) => {
+    res.end(JSON.stringify(results, null, 4))
+  }
 })
+
+module.exports = router
