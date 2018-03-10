@@ -23,7 +23,7 @@ router.get('/users', (req, res) => {
       throw error
     }
 
-    res.end(JSON.stringify(results, null, 4))
+    res.json( { result: results } )
   })
 })
 
