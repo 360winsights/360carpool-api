@@ -8,9 +8,9 @@ const userRouter = require('./routes/users.js')
 
 // server init
 const server = restify.createServer({
-    name: config.name,
-    version: config.version,
-    url: config.hostname
+  name: config.name,
+  version: config.version,
+  url: config.hostname
 })
 server.use(restify.plugins.acceptParser(server.acceptable))
 server.use(restify.plugins.queryParser())
