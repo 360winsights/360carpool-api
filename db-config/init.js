@@ -28,18 +28,18 @@ conn.connect((err) => {
   // create user table
   conn.query(`
     CREATE TABLE users (
-      id int NOT NULL PRIMARY KEY,
+      id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
       name varchar(255) NOT NULL,
-      company varchar(255) NOT NULL,
-      is_driver tinyint(1) NOT NULL,
-      street_address varchar(255) NOT NULL,
-      postal_code varchar(255) NOT NULL,
-      province varchar(255) NOT NULL,
-      country varchar(255) NOT NULL,
+      company varchar(255),
+      is_driver tinyint(1),
+      street_address varchar(255),
+      postal_code varchar(255),
+      province varchar(255),
+      country varchar(255),
       leave_home time,
       arrive_home time,
-      leave_work time NOT NULL,
-      arrive_work time NOT NULL
+      leave_work time,
+      arrive_work time
     )
   `)
 
@@ -69,6 +69,3 @@ conn.connect((err) => {
     )
   `)
 })
-
-// close mysql connection
-conn.end()
