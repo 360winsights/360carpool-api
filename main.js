@@ -5,22 +5,30 @@ const conn = config.db.get
 
 // routes
 const userRouter = require('./routes/users.js')
+const carsRouter = require('./routes/cars.js')
+const drivesRouter = require('./routes/drives.js')
+const companiesRouter = require('./routes/companies.js')
+const routerArr = [ userRouter, carsRouter, drivesRouter, companiesRouter ]
 
 // server init
 const server = restify.createServer({
-    name: config.name,
-    version: config.version,
-    url: config.hostname
+  name: config.name,
+  version: config.version,
+  url: config.hostname
 })
 server.use(restify.plugins.acceptParser(server.acceptable))
 server.use(restify.plugins.queryParser())
 server.use(restify.plugins.bodyParser())
 
 // apply router routes
-userRouter.applyRoutes(server)
+const len = routerArr.length
+for (let i = 0; i < len; ++i) {
+  routerArr[i].applyRoutes(server)
+}
 
 server.listen(config.port, () => {
-  console.log('%s listening at %s', server.name, server.url)
+  console.log(`${server.name} listening at ${server.url}`)
+  console.log('API requests are ready to be accepted!')
 })
 
 server.get('/', (req, res) => {

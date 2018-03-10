@@ -22,4 +22,6 @@ conn.connect((err) => {
 
     console.log('Database dropped')
   })
+
+  conn.end()
 })

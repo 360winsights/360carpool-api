@@ -1,0 +1,1 @@
+http://localhost:3000/users/create/John%20Denver/Google/0/420%20Green%20Street/Whitby/L1N4K3/Ontario/Canada
