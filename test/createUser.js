@@ -3,7 +3,7 @@ const restify = require('restify')
 const mysql = require('mysql')
 const conn = config.db.get
 
-conn.query('insert into users (name, company, is_driver, driver_id, karma, street_address, city, postal_code, province, country, leave_home, arrive_home, leave_work, arrive_work) values (\'Dude Man\', \'1\', \'0\', \'1\', \'0\', \'1269 Concession 3\', \'Uxbridge\', \'L0C1A0\', \'Ontario\', \'Canada\', \'08:00:00\', \'18:00:00\', \'17:00:00\', \'09:00:00\')', (err, rows, fields) => {
+conn.query('insert into users (name, company, is_driver, out_of_way, driver_id, karma, address, leave_home, arrive_home, leave_work, arrive_work) values (\'Nice Boi Billy\', \'1\', \'1\', \'30000\', \'1\', \'2000\', \'127 Planks Ln, Uxbridge, ON L9P 1K5\', \'08:00:00\', \'18:00:00\', \'17:00:00\', \'09:00:00\')', (err, rows, fields) => {
   if (err) {
     throw err
   }

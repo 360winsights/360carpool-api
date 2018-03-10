@@ -32,13 +32,10 @@ conn.connect((err) => {
       name varchar(255) NOT NULL,
       company int(11) NOT NULL,
       is_driver tinyint(1) NOT NULL,
+      out_of_way int(11) NOT NULL,
       driver_id int(11) NOT NULL,
       karma int(11),
-      street_address varchar(255) NOT NULL,
-      city varchar(255) NOT NULL,
-      postal_code varchar(255) NOT NULL,
-      province varchar(255) NOT NULL,
-      country varchar(255) NOT NULL,
+      address varchar(255) NOT NULL,
       leave_home time,
       arrive_home time,
       leave_work time NOT NULL,
@@ -49,6 +46,14 @@ conn.connect((err) => {
     }
 
     console.log('successfuly created users table')
+  })
+
+  conn.query('ALTER TABLE users ADD INDEX driver_id (driver_id)', (err, result) => {
+    if (err) {
+      throw err
+    }
+
+    console.log('successfuly add index to users table')
   })
 
   // car data
@@ -74,8 +79,8 @@ conn.connect((err) => {
     CREATE TABLE drives (
       id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
       driver_id int(11) NOT NULL,
-      available tinyint(1) NOT NULL,
-      FOREIGN KEY (driver_id) REFERENCES cars(driver_id)
+      waypoints varchar(2000) NOT NULL,
+      available tinyint(1) NOT NULL
     )`, (err, result) => {
     if (err) {
       throw err
@@ -84,16 +89,20 @@ conn.connect((err) => {
     console.log('successfuly created drives table')
   })
 
+  conn.query('ALTER TABLE drives ADD INDEX driver_id (driver_id)', (err, result) => {
+    if (err) {
+      throw err
+    }
+
+    console.log('successfuly add index to users table')
+  })
+
   // company
   conn.query(`
     CREATE TABLE companies (
       id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
       name varchar(255) NOT NULL,
-      street_address varchar(255) NOT NULL,
-      city varchar(255) NOT NULL,
-      postal_code varchar(255) NOT NULL,
-      province varchar(255) NOT NULL,
-      country varchar(255) NOT NULL
+      address varchar(255) NOT NULL
     )`, (err, result) => {
     if (err) {
       throw err

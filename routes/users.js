@@ -84,5 +84,16 @@ router.get('/users/updateKarma/:id/:value', (req, res) => {
   })
 })
 
+// get top n karma users
+router.get('/users/topKarma/:max', (req, res) => {
+  conn.query(`select name, karma from users order by karma desc limit ${req.params.max}`, (error, results, fields) => {
+    if (error) {
+      throw error
+    }
+
+    res.end(JSON.stringify(results, null, 4))
+  })
+})
+
 
 module.exports = router
