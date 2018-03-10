@@ -4,26 +4,32 @@ const server = require('../main.js').server
 const Router = require('restify-router').Router
 const router = new Router()
 
-// fetch all users
+// fetch all companies
 router.get('/company', (req, res) => {
-  conn.query('select * from companies', (error, results, fields) => {
-    if (error) {
-      throw error
-    }
-
-    res.json( { result: results } )
-  })
+  conn
+    .then((conn) => {
+      return conn.query('select * from companies')
+    })
+    .then((result) => {
+      res.json( { result: result } )
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 })
 
-// fetch user by id
+// fetch company by id
 router.get('/company/:id', (req, res) => {
-  conn.query(`select * from companies where id=${req.params.id}`, (error, results, fields) => {
-    if (error) {
-      throw error
-    }
-
-    res.json( { result: results } )
-  })
+  conn
+    .then((conn) => {
+      return conn.query(`select * from companies where id=${req.params.id}`)
+    })
+    .then((result) => {
+      res.json( { result: result } )
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 })
 
 

@@ -16,6 +16,7 @@
   "dependencies": {
     "@google/maps": "^0.4.5",
     "mysql": "^2.15.0",
+    "promise-mysql": "^3.2.1",
     "restify": "^6.3.4",
     "restify-plugins": "^1.6.0",
     "restify-router": "^0.5.0",

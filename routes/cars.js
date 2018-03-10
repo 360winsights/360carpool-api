@@ -6,13 +6,16 @@ const router = new Router()
 
 // fetch all cars
 router.get('/cars', (req, res) => {
-  conn.query('select * from cars', (error, results, fields) => {
-    if (error) {
-      throw error
-    }
-
-    res.json( { result: results } )
-  })
+  conn
+    .then((conn) => {
+      return conn.query('select * from cars')
+    })
+    .then((result) => {
+      res.json( { result: result } )
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 })
 
 module.exports = router

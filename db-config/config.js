@@ -1,4 +1,4 @@
-const mysql = require('mysql')
+const mysql = require('promise-mysql')
 const vars = require('./vars.js')
 
 module.exports = {

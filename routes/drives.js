@@ -7,24 +7,33 @@ const router = new Router()
 // get users riding with rider
 router.get('/drives/getRiders/:driver_id', (req, res) => {
   const query = 'select drives.driver_id, users.driver_id from drives join users on drives.driver_id=users.driver_id where drives.driver_id = ?'
-  conn.query(query, [req.params.driver_id], function (error, results, fields) {
-    if (error) {
-      throw error
-    }
-
-    res.json( { result: results })
+  conn
+  .then((conn) => {
+    const result = conn.query(query, [req.params.driver_id])
+    // do you end the connection here?
+    return result
+  })
+  .then((result) => {
+    res.json({ result })
+  })
+  .catch((err) => {
+    console.log(err)
   })
 })
 
 // get users riding with rider
 router.get('/drives/', (req, res) => {
   const query = 'select * from drives'
-  conn.query(query, function (error, results, fields) {
-    if (error) {
-      throw error
-    }
-
-    res.json( { result: results })
+  conn
+  .then((conn) => {
+    const result = conn.query(query)
+    return result
+  })
+  .then((result) => {
+    res.json({ result })
+  })
+  .catch((err) => {
+    console.log(err)
   })
 })
 
@@ -33,26 +42,115 @@ router.get('/drives/carpooling/joinRide/:driver_id/:rider_id/:which_way', (req, 
   const gmc = require('../maps/mapsConfig.js')
 
   // get user address
-  let rider_address
-  conn.query(`select address from users where id = ${req.params.rider_id}`, (err, results, fields) => {
-    if (err) {
-      throw err
+  let rider_address, connection, stops, params, origParams, flex
+  let regDist = 0
+  let newDist = 0
+  conn
+  .then((conn) => {
+    connection = conn
+    return connection.query(`select address from users where id = ${req.params.rider_id}`)
+  })
+  .then((result) => {
+    rider_address = result[0].address
+
+    return connection.query(`select drives.waypoints, users.address as driver_address, users.out_of_way as flex, companies.address as comp_address from drives inner join users on drives.driver_id=users.id inner join companies on users.company=companies.id where drives.driver_id = ${req.params.driver_id}`)
+  })
+  .then((result) => {
+    // get waypoint addresses
+    stops = result[0].waypoints
+    const origWaypoints = result[0].waypoints
+    const companyAddress = result[0].comp_address
+    const driverAddress = result[0].driver_address
+    flex = result[0].flex // how many more metres driver is willing to go out of way
+
+    if (stops == '') {
+      stops = rider_address
+    } else {
+      stops = `${stops}|${rider_address}`
     }
 
-    rider_address = results[0].address
+    let org, dest
+    if (req.params.which_way == 'home') {
+      org = companyAddress
+      dest = driverAddress
+    } else {
+      org = driverAddress
+      dest = companyAddress
+    }
 
-    // get waypoint addresses
-    let stops
-    conn.query(`select drives.waypoints, users.address as driver_address, users.out_of_way as flex, companies.address as comp_address from drives inner join users on drives.driver_id=users.id inner join companies on users.company=companies.id where drives.driver_id = ${req.params.driver_id}`, (err, results, fields) => {
-      if (err) {
-        throw err
-      }
+    params = {
+      origin: org,
+      destination: dest,
+      waypoints: stops == '' ? null : stops,
+      optimize: true
+    }
+    origParams = {
+      origin: org,
+      destination: dest,
+      waypoints: origWaypoints == '' ? null : origWaypoints,
+      optimize: true
+    }
 
-      stops = results[0].waypoints
-      const origWaypoints = results[0].waypoints
-      const companyAddress = results[0].comp_address
-      const driverAddress = results[0].driver_address
-      const flex = results[0].flex // how many more metres driver is willing to go out of way
+    return gmc.directions(params).asPromise()
+  })
+  .then((resp) => { // calculate new distance with user riding in car
+    const data = resp.json.routes[0].legs
+    const len = data.length
+    for (let i = 0; i < len; ++i) {
+      newDist += data[i].distance.value
+    }
+
+    return gmc.directions(origParams).asPromise()
+  })
+  .then((resp) => { // calculate original distance to drive without user
+    const data = resp.json.routes[0].legs
+    const len = data.length
+    for (let i = 0; i < len; ++i) {
+      regDist += data[i].distance.value
+    }
+
+    if (newDist - regDist > flex) {
+      res.json({status: 'error', message: 'User can\'t ride with this driver' })
+    } else {
+      connection
+      .query(`update drives set waypoints='${stops}' where driver_id = ${req.params.driver_id}`)
+      .then((result) => {
+        res.json({status: 'success', message: 'User can ride with this driver' })
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    }
+  })
+  .catch((err) => {
+    console.log(err)
+  })
+})
+
+// get array of available drivers and sort
+router.get('/drives/carpooling/searchRides/:rider_id/:which_way', (req, res) => {
+  const gmc = require('../maps/mapsConfig.js')
+
+  let arr = []
+  // get user address
+  let connection, rider_address, stops, flex, params, origParams
+  conn
+  .then((conn) => {
+    connection = conn
+    return connection.query(`select address from users where id = ${req.params.rider_id}`)
+  })
+  .then((result) => {
+    rider_address = result[0].address
+    return connection.query(`select drives.driver_id, drives.waypoints, users.address as driver_address, users.out_of_way as flex, companies.address as comp_address from drives inner join users on drives.driver_id=users.id inner join companies on users.company=companies.id`)
+  })
+  .then((result) => {
+    const len = result.length
+    const promises = result.map((item) => {
+      stops = item.waypoints
+      const origWaypoints = item.waypoints
+      const companyAddress = item.comp_address
+      const driverAddress = item.driver_address
+      flex = item.flex // how many more metres driver is willing to go out of way
 
       if (stops == '') {
         stops = rider_address
@@ -69,13 +167,13 @@ router.get('/drives/carpooling/joinRide/:driver_id/:rider_id/:which_way', (req, 
         dest = companyAddress
       }
 
-      const params = {
+      params = {
         origin: org,
         destination: dest,
         waypoints: stops == '' ? null : stops,
         optimize: true
       }
-      const origParams = {
+      origParams = {
         origin: org,
         destination: dest,
         waypoints: origWaypoints == '' ? null : origWaypoints,
@@ -84,154 +182,48 @@ router.get('/drives/carpooling/joinRide/:driver_id/:rider_id/:which_way', (req, 
 
       let regDist = 0
       let newDist = 0
-      gmc.directions(params)
-        .asPromise()
-        .then((resp) => {
-          const data = resp.json.routes[0].legs
-          const len = data.length
-          for (let i = 0; i < len; ++i) {
-            newDist += data[i].distance.value
-          }
+      return gmc.directions(params).asPromise()
+      .then((resp) => {
+        const data = resp.json.routes[0].legs
+        const len = data.length
 
-          gmc.directions(origParams)
-            .asPromise()
-            .then((resp) => {
-              const data = resp.json.routes[0].legs
-              const len = data.length
-              for (let i = 0; i < len; ++i) {
-                regDist += data[i].distance.value
-              }
+        for (let i = 0; i < len; ++i) {
+          newDist += data[i].distance.value
+        }
 
-              if (newDist - regDist > flex) {
-                res.json( {status: 'fail', message: 'User can\'t ride with this driver' })
-              } else {
-                conn.query(`update drives set waypoints='${stops}' where driver_id = ${req.params.driver_id}`, (err, results, fields) => {
-                  if (err) {
-                    throw err
-                  }
+        return gmc.directions(origParams).asPromise()
+      })
+      .then((resp) => {
+        const data = resp.json.routes[0].legs
+        const len = data.length
+        for (let i = 0; i < len; ++i) {
+          regDist += data[i].distance.value
+        }
 
-                  res.json( {status: 'success', message: 'User can ride with this driver' })
-                })
-              }
+        const extra = newDist - regDist
+        const obj = {
+          driver_id: item.driver_id,
+          startingFrom: org,
+          waypoints: origWaypoints,
+          destination: dest,
+          myAddedDist: extra
+        }
 
-              // const msg = `Original distance to travel is ${regDist} m. New distance to travel with user riding is ${newDist} m. Driver is willing to go ${flex} m extra out of their way. ${canThey}`
+        arr.push(obj)
+        return Promise.resolve()
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    })
 
-              // res.json( {status: status, message: msg })
-            })
-            .catch((err) => {
-              throw err
-            })
-        })
-        .catch((err) => {
-          throw err
-        })
+    // this Promise.all() and preceding logic assures the headers are not sent before
+    //  arr is fully populated
+    Promise.all(promises).then(() => {
+      const ascending = arr.sort((a, b) => Number(a.addedDist) - Number(b.addedDist))
+      res.json({ message: ascending })
     })
   })
-})
-
-// get array of available drivers and sort
-router.get('/drives/carpooling/searchRides/:rider_id/:which_way', (req, res) => {
-  const gmc = require('../maps/mapsConfig.js')
-
-  let arr = []
-  // get user address
-  let rider_address
-  conn.query(`select address from users where id = ${req.params.rider_id}`, (err, results, fields) => {
-    if (err) {
-      throw err
-    }
-
-    rider_address = results[0].address
-
-    // get waypoint addresses
-    let stops
-    conn.query(`select drives.driver_id, drives.waypoints, users.address as driver_address, users.out_of_way as flex, companies.address as comp_address from drives inner join users on drives.driver_id=users.id inner join companies on users.company=companies.id`, (err, results, fields) => {
-      if (err) {
-        throw err
-      }
-
-      const len = results.length
-      for (let i = 0; i < len; ++i) {
-        stops = results[i].waypoints
-        const origWaypoints = results[i].waypoints
-        const companyAddress = results[i].comp_address
-        const driverAddress = results[i].driver_address
-        const flex = results[i].flex // how many more metres driver is willing to go out of way
-
-        if (stops == '') {
-          stops = rider_address
-        } else {
-          stops = `${stops}|${rider_address}`
-        }
-
-        let org, dest
-        if (req.params.which_way == 'home') {
-          org = companyAddress
-          dest = driverAddress
-        } else {
-          org = driverAddress
-          dest = companyAddress
-        }
-
-        const params = {
-          origin: org,
-          destination: dest,
-          waypoints: stops == '' ? null : stops,
-          optimize: true
-        }
-        const origParams = {
-          origin: org,
-          destination: dest,
-          waypoints: origWaypoints == '' ? null : origWaypoints,
-          optimize: true
-        }
-
-        let regDist = 0
-        let newDist = 0
-        gmc.directions(params)
-          .asPromise()
-          .then((resp) => {
-            const data = resp.json.routes[0].legs
-            const len = data.length
-            for (let i = 0; i < len; ++i) {
-              newDist += data[i].distance.value
-            }
-
-            gmc.directions(origParams)
-              .asPromise()
-              .then((resp) => {
-                const data = resp.json.routes[0].legs
-                const len = data.length
-                for (let i = 0; i < len; ++i) {
-                  regDist += data[i].distance.value
-                }
-
-                const extra = newDist - regDist
-                const obj = {
-                  driver_id: results[i].driver_id,
-                  startingFrom: org,
-                  waypoints: origWaypoints,
-                  destination: dest,
-                  myAddedDist: extra
-                }
-
-                arr.push(obj)
-              })
-              .catch((err) => {
-                throw err
-              })
-          })
-          .catch((err) => {
-            throw err
-          })
-      }
-    })
-  })
-  setTimeout(() => {
-    const ascending = arr.sort((a, b) => Number(a.addedDist) - Number(b.addedDist))
-
-    res.json( { message: ascending } )
-  }, 2000)
 })
 
 module.exports = router
