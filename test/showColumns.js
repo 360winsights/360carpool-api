@@ -3,11 +3,8 @@ const restify = require('restify')
 const mysql = require('mysql')
 const conn = config.db.get
 
-console.log('\n\nHAHAHA\n\n')
-
 conn.query('select * from drives'), (error, results, fields) => {
   if (err) throw err
-  console.log('\n\nYEPYEP\n\n')
   console.log(JSON.stringify(results, null, 4))
 }
 
@@ -21,7 +18,6 @@ conn.query('show columns from drives', (err, rows, fields) => {
 
 conn.query('select * from drives'), (error, results, fields) => {
   if (err) throw err
-  console.log('\n\nYEPYEP\n\n')
   console.log(JSON.stringify(results, null, 4))
 }
 

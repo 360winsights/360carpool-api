@@ -8,7 +8,8 @@ const userRouter = require('./routes/users.js')
 const carsRouter = require('./routes/cars.js')
 const drivesRouter = require('./routes/drives.js')
 const companiesRouter = require('./routes/companies.js')
-const routerArr = [ userRouter, carsRouter, drivesRouter, companiesRouter ]
+const mapsRouter = require('./routes/maps.js')
+const routerArr = [ userRouter, carsRouter, drivesRouter, companiesRouter, mapsRouter ]
 
 // server init
 const server = restify.createServer({

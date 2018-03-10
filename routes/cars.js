@@ -8,7 +8,12 @@ const router = new Router()
 router.get('/cars', (req, res) => {
   conn
     .then((conn) => {
-      return conn.query('select * from cars')
+      params = {
+        origin: org,
+        destination: dest,
+        waypoints: stops == '' ? null : stops,
+        optimize: true
+      }
     })
     .then((result) => {
       res.json( { result: result } )
